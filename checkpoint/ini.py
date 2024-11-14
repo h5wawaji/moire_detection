@@ -47,10 +47,19 @@ def DWT(img):
     norm_LH = scale(LH, -1, 2)
     norm_HL = scale(HL, -1, 2)
     return norm_LL, norm_LH, norm_HL
+def preproces_data(img_path, size):
+    img = cv2.imread(img_path, 0)
+    if img is None:
+        return img
+    w, h = img.shape[1], img.shape[0]
+    #random crop
 
-model = load_model("weights-25-0.9087.hdf5")
+    #resize image
+    img = cv2.resize(img, size)
+    return img
+
+model = load_model("weights-01-0.9875.hdf5")
 PATH = "test_recapture"
-
 GT = 1
 batch_size = 16
 list_file = os.listdir(PATH)
@@ -68,9 +77,21 @@ for iteration in range(step + 1):
         if idx >= len(list_file):
             continue
         img_path = os.path.join(PATH, list_file[idx])
-        img = cv2.imread(img_path)
-        img = cv2.resize(img, (800, 500))
-        ll0, lh0, hl0 = DWT(img)
+        img = cv2.imread(img_path, 0)
+        #img = cv2.resize(img, (1280, 482))
+        ll0, lh0, hl0 = DWT(preproces_data(img_path, (1280, 960)))
+
+        ll1 = np.expand_dims(ll1, -1)
+        lh1 = np.expand_dims(lh1, -1)
+        hl1 = np.expand_dims(hl1, -1)
+        l1 = [0.0, 1.0]
+        ll_arr = np.array([ll0, ll1])
+        lh_arr = np.array([lh0, lh1])
+        hl_arr = np.array([hl0, hl1])
+        outp = np.array([l0, l1])
+        #yield ([ll_arr, lh_arr, hl_arr], outp)
+
+
         batch_ll.append(ll0)
         batch_lh.append(lh0)
         batch_hl.append(hl0)
@@ -84,7 +105,7 @@ for iteration in range(step + 1):
     batch_lh = np.asarray(batch_lh)
     batch_hl = np.asarray(batch_hl)
     
-    res = model.predict([batch_ll, batch_lh, batch_hl])
+    res = model.predict([batch_ll, batch_lh, batch_hl],)
     print(res)
     class_res = np.argmax(res, axis=1)
     print(class_res)
