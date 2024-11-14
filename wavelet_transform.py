@@ -6,6 +6,7 @@ import pywt
 import os
 
 def DWT(img):
+
     coeffs2 = pywt.dwt2(img, 'bior1.3')
     LL, (LH, HL, HH) = coeffs2     #500x402x4
 
