@@ -26,7 +26,7 @@ def DWT(img):
     return norm_LL, norm_LH, norm_HL
 
 # 加载模型
-model = tf.keras.models.load_model("weights-01-0.9875.hdf5")
+model = tf.keras.models.load_model("weights-01-0.9812.hdf5")
 
 # 获取当前目录下的所有图片文件
 current_dir = "test_recapture" # os.getcwd()
@@ -41,6 +41,7 @@ wrong_files = []
 for img_file in image_files:
     img_path = os.path.join(current_dir, img_file)
     img = cv2.imread(img_path, 0)  # 以灰度模式读取图像
+    img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
     if img is None:
         print(f"Warning: {img_file} is not a valid image file.")
         continue
